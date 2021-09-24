@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net
 --
 -- Client :  localhost
--- Généré le :  Ven 24 Septembre 2021 à 07:25
+-- Généré le :  Ven 24 Septembre 2021 à 08:41
 -- Version du serveur :  5.5.60-MariaDB
 -- Version de PHP :  7.2.13
 
@@ -906,7 +906,7 @@ CREATE TABLE IF NOT EXISTS `employee` (
   `lastname` varchar(255) NOT NULL,
   `address_id` int(11) NOT NULL,
   `gender` enum('M','F','O') NOT NULL,
-  `hire_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `hire_date` date NOT NULL,
   `birth_date` date NOT NULL,
   `email` varchar(255) NOT NULL,
   `mobile_number` varchar(255) NOT NULL,
@@ -919,14 +919,6 @@ CREATE TABLE IF NOT EXISTS `employee` (
   `nationality` varchar(255) NOT NULL DEFAULT 'Belgian'
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
---
--- Contenu de la table `employee`
---
-
-INSERT INTO `employee` (`emp_no`, `firstname`, `lastname`, `address_id`, `gender`, `hire_date`, `birth_date`, `email`, `mobile_number`, `job_id`, `dep_id`, `retired`, `city_of_birth`, `country_of_birth`, `primary_language`, `nationality`) VALUES
-(2, 'Hugo', 'Poncelet', 1, 'M', '2021-09-22 14:55:40', '1998-06-29', 'hugo.poncelet@gmail.com', '0491461051', 1, 1, 0, 'Namur', 'Belgium', 'French', 'Belgian'),
-(3, 'Elisa', 'Etienne', 2, 'F', '2021-09-22 14:56:44', '1998-06-15', 'elisa.etienne@gmail.com', '0497847564', 1, 1, 0, 'Namur', 'Belgium', 'French', 'Belgian');
-
 -- --------------------------------------------------------
 
 --
@@ -935,6 +927,7 @@ INSERT INTO `employee` (`emp_no`, `firstname`, `lastname`, `address_id`, `gender
 
 CREATE TABLE IF NOT EXISTS `flight` (
   `id` int(11) NOT NULL,
+  `id_aircraft` int(11) NOT NULL,
   `airport_departure` int(11) NOT NULL,
   `airport_arrival` int(11) NOT NULL,
   `products_details` int(11) NOT NULL,
@@ -951,10 +944,37 @@ CREATE TABLE IF NOT EXISTS `flight` (
 
 CREATE TABLE IF NOT EXISTS `freight` (
   `id` int(11) NOT NULL,
-  `uld_id` int(11) NOT NULL,
-  `secure` tinyint(1) NOT NULL COMMENT 'secure means the merchandise is from a trusted partner and does not need to be checked',
-  `weight` int(11) NOT NULL,
+  `id_flight` int(11) NOT NULL,
+  `id_ULD` int(11) NOT NULL,
+  `ULD_position` int(11) NOT NULL,
+  `secure` tinyint(1) NOT NULL,
+  `weight` float NOT NULL,
   `label_tag` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `invoice`
+--
+
+CREATE TABLE IF NOT EXISTS `invoice` (
+  `id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `id_client` int(11) NOT NULL,
+  `amount` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `invoice_detail`
+--
+
+CREATE TABLE IF NOT EXISTS `invoice_detail` (
+  `id` int(11) NOT NULL,
+  `id_invoice` int(11) NOT NULL,
+  `id_freight` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1014,6 +1034,21 @@ CREATE TABLE IF NOT EXISTS `maintenance_employee` (
   `id` int(11) NOT NULL,
   `maintenance_id` int(11) NOT NULL,
   `employee_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `project`
+--
+
+CREATE TABLE IF NOT EXISTS `project` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `project_manager` int(11) NOT NULL,
+  `status` enum('not started','in progress','warning','completed') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1191,14 +1226,31 @@ ALTER TABLE `flight`
   ADD KEY `airport_departure` (`airport_departure`),
   ADD KEY `airport_arrival` (`airport_arrival`),
   ADD KEY `products_details` (`products_details`),
-  ADD KEY `crew_members_id` (`crew_members_id`);
+  ADD KEY `crew_members_id` (`crew_members_id`),
+  ADD KEY `id_aircraft` (`id_aircraft`);
 
 --
 -- Index pour la table `freight`
 --
 ALTER TABLE `freight`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `uld_id` (`uld_id`);
+  ADD KEY `id_flight` (`id_flight`),
+  ADD KEY `id_ULD` (`id_ULD`);
+
+--
+-- Index pour la table `invoice`
+--
+ALTER TABLE `invoice`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_client` (`id_client`);
+
+--
+-- Index pour la table `invoice_detail`
+--
+ALTER TABLE `invoice_detail`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_invoice` (`id_invoice`),
+  ADD KEY `id_freight` (`id_freight`);
 
 --
 -- Index pour la table `job`
@@ -1227,6 +1279,13 @@ ALTER TABLE `maintenance_employee`
   ADD PRIMARY KEY (`id`),
   ADD KEY `employee_id` (`employee_id`),
   ADD KEY `maintenance_id` (`maintenance_id`);
+
+--
+-- Index pour la table `project`
+--
+ALTER TABLE `project`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `project_manager` (`project_manager`);
 
 --
 -- Index pour la table `supplier`
@@ -1313,9 +1372,9 @@ ALTER TABLE `department`
 ALTER TABLE `employee`
   MODIFY `emp_no` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
--- AUTO_INCREMENT pour la table `freight`
+-- AUTO_INCREMENT pour la table `invoice`
 --
-ALTER TABLE `freight`
+ALTER TABLE `invoice`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT pour la table `job`
@@ -1326,6 +1385,11 @@ ALTER TABLE `job`
 -- AUTO_INCREMENT pour la table `maintenance`
 --
 ALTER TABLE `maintenance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT pour la table `project`
+--
+ALTER TABLE `project`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT pour la table `supplier`
@@ -1413,8 +1477,29 @@ ALTER TABLE `employee`
 -- Contraintes pour la table `flight`
 --
 ALTER TABLE `flight`
+  ADD CONSTRAINT `flight_ibfk_3` FOREIGN KEY (`id_aircraft`) REFERENCES `aircraft` (`id`),
   ADD CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`airport_departure`) REFERENCES `airport` (`id`),
   ADD CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`airport_arrival`) REFERENCES `airport` (`id`);
+
+--
+-- Contraintes pour la table `freight`
+--
+ALTER TABLE `freight`
+  ADD CONSTRAINT `freight_ibfk_2` FOREIGN KEY (`id_ULD`) REFERENCES `ULD` (`code`),
+  ADD CONSTRAINT `freight_ibfk_1` FOREIGN KEY (`id_flight`) REFERENCES `flight` (`id`);
+
+--
+-- Contraintes pour la table `invoice`
+--
+ALTER TABLE `invoice`
+  ADD CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `client` (`id`);
+
+--
+-- Contraintes pour la table `invoice_detail`
+--
+ALTER TABLE `invoice_detail`
+  ADD CONSTRAINT `invoice_detail_ibfk_2` FOREIGN KEY (`id_freight`) REFERENCES `freight` (`id`),
+  ADD CONSTRAINT `invoice_detail_ibfk_1` FOREIGN KEY (`id_invoice`) REFERENCES `invoice` (`id`);
 
 --
 -- Contraintes pour la table `job_detail`
@@ -1437,17 +1522,17 @@ ALTER TABLE `maintenance_employee`
   ADD CONSTRAINT `maintenance_employee_ibfk_2` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Contraintes pour la table `project`
+--
+ALTER TABLE `project`
+  ADD CONSTRAINT `project_ibfk_1` FOREIGN KEY (`project_manager`) REFERENCES `employee` (`emp_no`);
+
+--
 -- Contraintes pour la table `supplier`
 --
 ALTER TABLE `supplier`
   ADD CONSTRAINT `supplier_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `supplier_type` (`id`),
   ADD CONSTRAINT `supplier_ibfk_2` FOREIGN KEY (`address_id`) REFERENCES `address` (`id`);
-
---
--- Contraintes pour la table `ULD`
---
-ALTER TABLE `ULD`
-  ADD CONSTRAINT `ULD_ibfk_1` FOREIGN KEY (`code`) REFERENCES `freight` (`uld_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `vehicle`

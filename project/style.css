@@ -1,0 +1,94 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+
+:root {
+    --main-color: #097aa7;
+    --color-dark: #1D2231;
+    --text-grey: #8360A2;
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style-type: none;
+    box-sizing: border-box;
+}
+
+
+#sidebar-toggle {
+    display: none;
+}
+
+.sidebar {
+    height: 100%;
+    width: 220px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    background: var(--main-color);
+    overflow-y: auto;
+    transition: width 500ms;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+}
+
+.sidebar-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0rem 1rem;
+}
+
+.sidebar-menu{
+    padding: 1rem;
+    white-space: nowrap;
+}
+
+.sidebar li {
+    margin-bottom: 1rem;
+}
+
+.sidebar a {
+    color: #fff;
+    font-size: .9rem;
+}
+
+.sidebar a span:last-child{
+    padding-left: .6rem;
+}
+
+#sidebar-toggle:checked ~ .sidebar{
+    width: 60px;
+}
+
+#sidebar-toggle:checked ~ .sidebar .sidebar-header h3 span,
+#sidebar-toggle:checked ~ .sidebar li span:last-child{
+    display: none;
+}
+
+#sidebar-toggle:checked ~ .sidebar .sidebar-header,
+#sidebar-toggle:checked ~ .sidebar li{
+    display:flex;
+    justify-content: center;
+}
+
+#sidebar-toggle:checked ~ .main-content{
+    margin-left: 60px;
+}
+
+.main-content {
+    position: relative;
+    margin-left: 220px;
+    transition: margin-left 500ms;
+}
+
+.swissport_logo {
+    padding: 5px;
+    max-width: 100%;
+}
+

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net
 --
 -- Client :  localhost
--- Généré le :  Ven 24 Septembre 2021 à 08:41
+-- Généré le :  Ven 24 Septembre 2021 à 09:00
 -- Version du serveur :  5.5.60-MariaDB
 -- Version de PHP :  7.2.13
 
@@ -930,10 +930,10 @@ CREATE TABLE IF NOT EXISTS `flight` (
   `id_aircraft` int(11) NOT NULL,
   `airport_departure` int(11) NOT NULL,
   `airport_arrival` int(11) NOT NULL,
-  `products_details` int(11) NOT NULL,
-  `departure_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `arrival_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `crew_members_id` int(11) NOT NULL
+  `scheduled_departure_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `scheduled_arrival_time` timestamp NULL DEFAULT NULL,
+  `observed_departure_time` timestamp NULL DEFAULT NULL,
+  `observed_arrival_time` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1225,8 +1225,6 @@ ALTER TABLE `flight`
   ADD PRIMARY KEY (`id`),
   ADD KEY `airport_departure` (`airport_departure`),
   ADD KEY `airport_arrival` (`airport_arrival`),
-  ADD KEY `products_details` (`products_details`),
-  ADD KEY `crew_members_id` (`crew_members_id`),
   ADD KEY `id_aircraft` (`id_aircraft`);
 
 --
@@ -1477,9 +1475,9 @@ ALTER TABLE `employee`
 -- Contraintes pour la table `flight`
 --
 ALTER TABLE `flight`
-  ADD CONSTRAINT `flight_ibfk_3` FOREIGN KEY (`id_aircraft`) REFERENCES `aircraft` (`id`),
   ADD CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`airport_departure`) REFERENCES `airport` (`id`),
-  ADD CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`airport_arrival`) REFERENCES `airport` (`id`);
+  ADD CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`airport_arrival`) REFERENCES `airport` (`id`),
+  ADD CONSTRAINT `flight_ibfk_3` FOREIGN KEY (`id_aircraft`) REFERENCES `aircraft` (`id`);
 
 --
 -- Contraintes pour la table `freight`

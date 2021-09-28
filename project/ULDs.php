@@ -3,6 +3,7 @@
     include_once("header.php");
     include("includes/dbconn.inc.php");
     include("sidebar.php");
+    echo"test";
 ?>
 
 <div class="main-content">
